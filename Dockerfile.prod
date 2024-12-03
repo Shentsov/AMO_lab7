@@ -1,0 +1,21 @@
+FROM ubuntu:20.04
+
+# Установка переменных окружения
+ENV DEBIAN_FRONTEND=noninteractive
+ENV TZ=Etc/UTC
+
+# Установка необходимых пакетов
+RUN apt-get update && apt-get install -y \
+    python3 python3-pip openssh-server sudo tzdata git \
+    && apt-get clean
+
+# Настройка SSH-сервера
+RUN mkdir /var/run/sshd
+RUN useradd -rm -d /home/devuser -s /bin/bash -g root -G sudo -u 1001 devuser
+RUN echo 'devuser:password' | chpasswd
+RUN echo "PubkeyAuthentication yes" >> /etc/ssh/sshd_config
+
+# Открываем порт для SSH
+EXPOSE 22
+
+CMD ["/usr/sbin/sshd", "-D"]
